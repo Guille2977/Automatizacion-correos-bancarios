@@ -1,4 +1,4 @@
-"""Conexión a Gmail con permiso de solo lectura."""
+"""Conexión a Google (Gmail y Sheets) con permisos mínimos."""
 
 import base64
 import html
@@ -6,28 +6,52 @@ import re
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 
+from datetime import date
+from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
-# Solo lectura: el programa no puede enviar, borrar ni modificar correos.
-SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
+SCOPES = [
+    "https://www.googleapis.com/auth/gmail.readonly",  # leer las notificaciones del banco
+    "https://www.googleapis.com/auth/gmail.send",      # enviarte el resumen diario
+    "https://www.googleapis.com/auth/drive.file",      # solo la hoja que crea el programa
+]
 
 
-def conectar(credenciales: str = "credentials.json", token: str = "token.json"):
-    """Inicia sesión con OAuth. La primera vez abre el navegador; luego reutiliza token.json."""
+def obtener_credenciales(credenciales: str = "credentials.json", token: str = "token.json",
+                         interactivo: bool = True):
+    """Inicia sesión con OAuth. La primera vez abre el navegador; luego reutiliza token.json.
+
+    En modo no interactivo (tarea programada) nunca abre el navegador: si el permiso venció,
+    termina con un mensaje claro en lugar de quedarse esperando.
+    """
     creds = None
     if Path(token).exists():
         creds = Credentials.from_authorized_user_file(token, SCOPES)
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
+        if not creds.has_scopes(SCOPES):  # cambiaron los permisos: hay que volver a autorizar
+            creds = None
+    if creds and not creds.valid and creds.expired and creds.refresh_token:
+        try:
             creds.refresh(Request())
-        else:
-            flujo = InstalledAppFlow.from_client_secrets_file(credenciales, SCOPES)
-            creds = flujo.run_local_server(port=0)
-        Path(token).write_text(creds.to_json(), encoding="utf-8")
-    return build("gmail", "v1", credentials=creds)
+        except RefreshError:  # en modo Prueba de Google, el permiso vence a los 7 días
+            creds = None
+    if not creds or not creds.valid:
+        if not interactivo:
+            raise SystemExit("El permiso de Google venció o no existe. Para renovarlo, ejecuta "
+                             "manualmente: del token.json y luego python main.py")
+        flujo = InstalledAppFlow.from_client_secrets_file(credenciales, SCOPES)
+        creds = flujo.run_local_server(port=0)
+        # Fecha de autorización: en modo Prueba el permiso vence a los 7 días
+        Path("data").mkdir(exist_ok=True)
+        Path("data/autorizado_el.txt").write_text(date.today().isoformat(), encoding="utf-8")
+    Path(token).write_text(creds.to_json(), encoding="utf-8")
+    return creds
+
+
+def conectar(creds=None):
+    return build("gmail", "v1", credentials=creds or obtener_credenciales())
 
 
 def buscar_ids(servicio, consulta: str, maximo: int = 500) -> list:
