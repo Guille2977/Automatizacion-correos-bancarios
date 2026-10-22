@@ -51,3 +51,14 @@ def test_devolucion_tiene_prioridad_sobre_consumo():
 
 def test_correo_sin_monto_se_descarta():
     assert extraer("demo-07") is None
+
+
+def test_compra_rechazada_no_es_movimiento():
+    assert parser.extraer("Se rechazó tu compra por fondos insuficientes",
+                          "Lo sentimos, tu compra de S/ 30.00 fue rechazada.") is None
+
+
+def test_pago_de_servicio():
+    datos = parser.extraer("CONSTANCIA DE PAGO DE SERVICIO", "Pagaste S/ 89.90 por tu recibo de luz.")
+    assert datos["tipo"] == "Pago de servicio"
+    assert datos["sentido"] == "Egreso"

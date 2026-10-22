@@ -7,7 +7,7 @@ PATRON_MONTO = re.compile(r"(S/\.?|US\$|USD|PEN|\$)\s*(\d[\d.,]*\d|\d)")
 
 MONEDAS = {"S/": "PEN", "S/.": "PEN", "PEN": "PEN", "US$": "USD", "USD": "USD", "$": "USD"}
 
-# Tipos en orden de prioridad: el primero que coincide gana.
+# Tipos de movimiento en orden de prioridad: el primero que coincide gana.
 # "Devolución" va antes que "Consumo" ("devolución de consumo") y
 # "Depósito" antes que "Transferencia enviada" ("transferencia recibida").
 TIPOS = [
@@ -15,12 +15,16 @@ TIPOS = [
     ("Retiro", r"retiro|disposici[oó]n de efectivo"),
     ("Depósito", r"dep[oó]sito|abono|recibiste|te yapearon|transferencia recibida"),
     ("Transferencia enviada", r"transferencia|yapeaste|enviaste"),
+    ("Pago de servicio", r"pago de servicio|pago de recibo"),
     ("Consumo", r"consumo|compra|cargo|pagaste|pago con tu tarjeta"),
 ]
 
+# Avisos que mencionan un monto pero NO son un movimiento realizado
+NO_MOVIMIENTO = r"rechaz|no se pudo|fondos insuficientes|pronto|recordatorio|programad"
+
 INGRESOS = {"Devolución", "Depósito"}
 
-# Contraparte con etiqueta: "Comercio: X", "Beneficiario: X"...
+# Contraparte indicada con una etiqueta: "Comercio: X", "Beneficiario: X"...
 PATRON_ETIQUETA = re.compile(
     r"(?:comercio|establecimiento|empresa|beneficiario|destinatario|ordenante|origen)\s*:\s*([^\n.]+)",
     re.IGNORECASE,
@@ -67,12 +71,17 @@ def detectar_contraparte(cuerpo: str):
 
 
 def extraer(asunto: str, cuerpo: str):
-    """Devuelve los datos del movimiento, o None si el correo no tiene un monto."""
+    """Devuelve los datos del movimiento, o None si el correo no es un movimiento realizado."""
+    if re.search(NO_MOVIMIENTO, asunto, re.IGNORECASE):
+        return None  # compra rechazada, recordatorio, etc.
+
     monto = PATRON_MONTO.search(cuerpo) or PATRON_MONTO.search(asunto)
     if not monto:
         return None
 
     tipo = detectar_tipo(asunto, cuerpo)
+    if tipo == "Otro":
+        return None  # tiene un monto, pero no es un tipo de operación conocido
     operacion = PATRON_OPERACION.search(cuerpo)
     return {
         "tipo": tipo,
