@@ -218,3 +218,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Credenciales y datos personales: NUNCA se suben
+credentials.json
+token.json
+.env
+data/

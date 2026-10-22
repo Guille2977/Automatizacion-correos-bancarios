@@ -1,0 +1,51 @@
+[
+  {
+    "id": "demo-01",
+    "fecha": "2026-10-03 19:42:00",
+    "remitente": "notificaciones@bancoejemplo.example",
+    "asunto": "Consumo con tu tarjeta de débito",
+    "cuerpo": "Hola, realizaste un consumo de S/ 45.90 en SUPERMERCADO CENTRAL SAN ISIDRO el 03/10/2026 a las 19:42. Número de operación: 482910."
+  },
+  {
+    "id": "demo-02",
+    "fecha": "2026-10-05 08:15:00",
+    "remitente": "notificaciones@bancoejemplo.example",
+    "asunto": "Compra por internet",
+    "cuerpo": "Realizaste una compra por US$ 12.99 en STREAMING PLUS. Número de operación: 771203."
+  },
+  {
+    "id": "demo-03",
+    "fecha": "2026-10-01 10:00:00",
+    "remitente": "notificaciones@bancoejemplo.example",
+    "asunto": "Depósito recibido",
+    "cuerpo": "Recibiste un depósito de S/ 1,250.00 en tu cuenta de ahorros. Ordenante: EMPRESA DEMO SAC. Número de operación: 553201."
+  },
+  {
+    "id": "demo-04",
+    "fecha": "2026-10-07 21:30:00",
+    "remitente": "notificaciones@bancoejemplo.example",
+    "asunto": "Constancia de transferencia",
+    "cuerpo": "Realizaste una transferencia de S/ 200.00. Beneficiario: CONTACTO DEMO. Número de operación: 660145."
+  },
+  {
+    "id": "demo-05",
+    "fecha": "2026-09-28 18:05:00",
+    "remitente": "notificaciones@bancoejemplo.example",
+    "asunto": "Retiro de efectivo",
+    "cuerpo": "Retiro en cajero por S/ 300.00 en CAJERO AV AREQUIPA. Número de operación: 120034."
+  },
+  {
+    "id": "demo-06",
+    "fecha": "2026-10-09 12:00:00",
+    "remitente": "notificaciones@bancoejemplo.example",
+    "asunto": "Devolución de consumo",
+    "cuerpo": "Se realizó la devolución de S/ 45.90 de SUPERMERCADO CENTRAL a tu tarjeta. Número de operación: 482955."
+  },
+  {
+    "id": "demo-07",
+    "fecha": "2026-09-20 09:00:00",
+    "remitente": "novedades@bancoejemplo.example",
+    "asunto": "Conoce nuestras nuevas tarjetas",
+    "cuerpo": "Descubre los beneficios de nuestras tarjetas y solicita la tuya desde la app."
+  }
+]
